@@ -156,7 +156,7 @@ console.log(derbyPosts.get());
 // You always will want to assign the transformation to a Model ref, so you can
 // use the results with a human-readable path (here '_derbyPosts') in your
 // views.
-var derbyPostsRef = model.ref('_derbyPosts', postsWithDerby);
+var derbyPostsRef = model.ref('_derbyPosts', derbyPosts);
 
 // derbyPostsRef is a scoped Model
 
@@ -216,6 +216,24 @@ model.subscribe(query, function (err, results) {
     results.filter({ tags: { contains: ['important'] } })
   );
 });
+```
+
+Transformations can also handle dynamically changing parameters. Let's suppose
+that you want to filter a set of flights based on departure time. You can write:
+
+```javascript
+var DAY = 24 * 3600 * 1000;
+model.set('_departureTime', new Date(+new Date + 3 * DAY))
+model.ref('_matchingFlights',
+  model.filter('flights').where('departAt').gt(model.at('_departureTime'))
+);
+var flightsDepartingInThreeDays = model.get('_matchingFlights');
+
+// You can now modify _departure time and _matchingFlights will get updated
+model.set('_departureTime', new Date(+new Date + 4 * DAYS))
+var flightsDepartingInFourDays = model.get('_matchingFlights');
+
+// In this case, flightsDepartingInThreeDays will not equal flightsDepartingInFourDays
 ```
 
 ## Architecture
